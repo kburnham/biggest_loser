@@ -9,6 +9,7 @@
 
 library(shiny)
 library(tidyverse)
+library(lubridate)
 
 users <- list("BK" = list(name = "kevin",
                              target = 195,
@@ -46,23 +47,26 @@ add_to_log <- function(person, date, weight) {
 
 
 
-
-
-# # save all the logs
-# for (person in names(users)) {
-#   log <- users[[person]][["weighins"]]
-#   nn <- map_chr(users, "nickname")[names(users) == person]
-#   saveRDS(log, paste0(nn, "_log.rds"))
-# }
-
-
-  
-
-
-
 ## this function takes in a date, weight df and outputs rolling average and other data as required
-process_log <- function(log) {
-  ## add to the front of the log so that the rollmean will work
+process_log <- function(log, days_to_average = 7) {
+  ## add to front of log so that rollmean and roll sum will always work
+  append <- data.frame(date = seq(min(log$date) - days(7), min(log$date) - days(1),
+                                  by = "days"),
+                       weight = log$weight[log$date == min(log$date)])
+  log <- rbind(append, log)
+  
+  
+  log %>% 
+    mutate(source = "scale") %>% 
+    right_join(data.frame(date = seq(from = min(log$date), to = max(log$date), "days"))) %>% 
+    arrange(desc(date)) %>% 
+    mutate(source = ifelse(is.na(source), "fill", "scale"),
+           weight = na.approx(weight),
+          moving_average = rollmean(weight, days_to_average, fill = "extend", align = "left") %>% round(2),
+          daily_weight_loss = (moving_average - lead(moving_average)) * -1,
+          weight_loss_past_7_days = rollsum(daily_weight_loss, 7, fill = "extend", align = "left") %>% round(2)
+    )
+  
   
 }
 
