@@ -8,27 +8,64 @@
 #
 
 library(shiny)
-library(googlesheets)
+library(tidyverse)
 
-wil_ss <- gs_title("WeighInLog")
+users <- list("BK" = list(name = "kevin",
+                             target = 195,
+                             weighins = data.frame()
+                            ),
+              "NoushDog" = list(name = "anousha",
+                               target = 110,
+                               weighins = data.frame()
+              ),
+              "RoryBoo" = list(name = "rory",
+                            target = 155,
+                            weighins = data.frame()
+                            ),
+              "Snowzy" = list(name = "Snowden",
+                               target = 142,
+                               weighins = data.frame()
+                               )
+              
+              )
 
-## this function uses googlesheets to get the log for a specified individual
+
+
+## make each log a separate rds object named after its user
 load_log <- function(person) {
-  log <- gs_read(wil_ss, ws = person)
-  return(log)
+  log <- readRDS(paste0(person, "_log.rds"))
 }
 
 add_to_log <- function(person, date, weight) {
-  wil_ss %>% gs_add_row(ws = person, input = data.frame(date, weight))
+  input <- data.frame(date = as.Date(date), weight = weight)
+  log <- load_log(person)
+  log <- rbind(log, input)
+  saveRDS(log, paste0(person, "_log.rds"))
 }
+
+
+
+
+
+
+# # save all the logs
+# for (person in names(users)) {
+#   log <- users[[person]][["weighins"]]
+#   nn <- map_chr(users, "nickname")[names(users) == person]
+#   saveRDS(log, paste0(nn, "_log.rds"))
+# }
+
+
+  
+
+
+
 ## this function takes in a date, weight df and outputs rolling average and other data as required
 process_log <- function(log) {
   ## add to the front of the log so that the rollmean will work
   
 }
 
-
-targets <- structure(c(110, 195, 155, 142), .Names = c("NoushDog", "BK", "RoryBoo", "Snowzy"))
 
 
 # Define UI for application that draws a histogram
@@ -40,7 +77,7 @@ ui <- fluidPage(
    # Sidebar with a slider input for number of bins 
    sidebarLayout(
       sidebarPanel(
-         selectInput("person", "Person", players),
+         selectInput("person", "Person", names(users)),
          dateInput("date", "Date", value = Sys.Date()),
          numericInput("weight", "Weight", value = NA),
          actionButton("add_weight", "Add Weight")
@@ -62,8 +99,13 @@ server <- function(input, output) {
       return(new)
     } else {
       return(load_log(input$person))
-    }})
+    }}, ignoreNULL = FALSE)
   
+  
+  log <- eventReactive(input$person, {
+    return(load_log(input$person))
+  })
+
    output$log <- renderDataTable({log()})
   }
 
