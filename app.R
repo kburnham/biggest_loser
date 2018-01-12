@@ -50,14 +50,13 @@ add_to_log <- function(person, date, weight) {
   write_csv(log, "log.csv")
 }
 
-delete_from_log <- function(user, Date, Weight) {
-  log <- load_log() %>% 
-    filter(person != user & date != Date & weight != Weight)
-  
-  write_csv(log, "log.csv")
-  
-}
-delete_from_log("BK", as.Date("2018-01-12"), 500)
+# delete_from_log <- function(user, Date, Weight) {
+#   log <- load_log() %>% 
+#     filter(person != user & date != Date & weight != Weight)
+#   
+#   write_csv(log, "log.csv")
+#   
+# }
 
 
 ## this function takes in a date, weight df and outputs rolling average and other data as required
