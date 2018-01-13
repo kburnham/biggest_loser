@@ -11,23 +11,16 @@ library(shiny)
 library(tidyverse)
 library(lubridate)
 library(zoo)
-users <- list("BK" = list(name = "kevin",
-                             target = 195
-                            ),
-              "NoushDog" = list(name = "anousha",
-                               target = 110
-              ),
-              "RoryBoo" = list(name = "rory",
-                            target = 155
-                            ),
-              "Snowzy" = list(name = "Snowden",
-                               target = 142
-                               )
-              
-              )
+library(jsonlite)
 
 
+end_date = "04/30/2018"
+users <- fromJSON("users.json")
 
+
+walk(names(users), function(x) {
+  users[[x]]$desired_weight_loss <- users[[x]]$initial - users[[x]]$target
+})
 ## make each log a separate rds object named after its user
 load_log <- function(user = NA) {
   log <- read_csv("log.csv")
@@ -35,13 +28,7 @@ load_log <- function(user = NA) {
 }
 
 
-# names(omni_log) <- names(users)
-# log <- bind_rows(omni_log, .id = 'person')
-# saveRDS(log, "log.RDS")
 
-
-
-#add_to_log("kevin", as.Date("2018-01-21"), 50)
 
 add_to_log <- function(person, date, weight) {
   input <- data.frame(person = person, date = as.Date(date), weight = weight)
@@ -50,19 +37,13 @@ add_to_log <- function(person, date, weight) {
   write_csv(log, "log.csv")
 }
 
-# delete_from_log <- function(user, Date, Weight) {
-#   log <- load_log() %>% 
-#     filter(person != user & date != Date & weight != Weight)
-#   
-#   write_csv(log, "log.csv")
-#   
-# }
 
 
-## this function takes in a date, weight df and outputs rolling average and other data as required
 process_log <- function(log, who, days_to_average = 7) {
   ## add to front of log so that rollmean and roll sum will always work
+
   log <- log %>% filter(person == who)
+  
   append <- data.frame(person = who, date = seq(min(log$date) - days(8), min(log$date) - days(1),
                                   by = "days"),
                        weight = log$weight[log$date == min(log$date)])
@@ -83,6 +64,42 @@ process_log <- function(log, who, days_to_average = 7) {
 }
 
 
+summarize_all <- function(log, users) {
+  dat <- map_df(names(users), function(x) {
+    process_log(log = log, who = x)
+  })
+  return(dat)
+}
+
+get_current_weight <- function(log, users) {
+  all <- summarize_all(log, users)
+  
+ current_weights <-  map_dbl(names(users), function(x) {
+    all %>% filter(person == x) %>% filter(date == max(date)) %>% 
+      pull(moving_average)
+  })
+  names(current_weights) <- names(users)
+  return(current_weights)
+}
+
+
+compute_progress <- function(initial, target, current) {
+  weight_loss <- current - initial
+  goal <- inital - target
+  
+}
+
+plot_progress <- function(log, users) {
+  all <- summarize_all(log, users)
+  initials <- map_chr(users, "initial")
+  targets <- map_chr(users, "target")
+  currents <- get_current_weight(log, users)
+  
+  weight_loss <- initials - currents
+  
+  
+  
+}
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -130,7 +147,7 @@ server <- function(input, output) {
 
 
 
-
+map(users, "initial")
 # Run the application 
 shinyApp(ui = ui, server = server)
 
