@@ -1,0 +1,27 @@
+  {
+  "BK": {
+    "name": ["kevin"],
+    "target": [195],
+    "initial": [215.7]
+  },
+  "NoushDog": {
+    "name": ["anousha"],
+    "target": [110],
+    "initial": [116]
+  },
+  "RoryBoo": {
+    "name": ["rory"],
+    "target": [155],
+    "initial": [167]
+  },
+  "Snowzy": {
+    "name": ["Snowden"],
+    "target": [142],
+    "initial": [152]
+  },
+  "ZarZar": {
+    "name": ["Zarrin"],
+    "target": [140],
+    "initial": [149]
+  }
+}
