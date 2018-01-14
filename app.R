@@ -18,9 +18,9 @@ end_date = "04/30/2018"
 users <- fromJSON("users.json")
 
 
-walk(names(users), function(x) {
-  users[[x]]$desired_weight_loss <- users[[x]]$initial - users[[x]]$target
-})
+# walk(names(users), function(x) {
+#   users[[x]]$desired_weight_loss <- users[[x]]$initial - users[[x]]$target
+# })
 ## make each log a separate rds object named after its user
 load_log <- function(user = NA) {
   log <- read_csv("log.csv")
@@ -54,6 +54,7 @@ process_log <- function(log, who, days_to_average = 7) {
     right_join(data.frame(date = seq(from = min(log$date), to = max(log$date), "days"))) %>% 
     arrange(desc(date)) %>% 
     mutate(source = ifelse(is.na(source), "fill", "scale"),
+           person = who,
            weight = na.approx(weight),
           moving_average = rollmean(weight, days_to_average, fill = "extend", align = "left") %>% round(2),
           daily_weight_loss = (moving_average - lead(moving_average)) * -1,
@@ -73,8 +74,7 @@ summarize_all <- function(log, users) {
 
 get_current_weight <- function(log, users) {
   all <- summarize_all(log, users)
-  
- current_weights <-  map_dbl(names(users), function(x) {
+ current_weights <-  map_dbl("Snowzy", function(x) {
     all %>% filter(person == x) %>% filter(date == max(date)) %>% 
       pull(moving_average)
   })
@@ -84,20 +84,30 @@ get_current_weight <- function(log, users) {
 
 
 compute_progress <- function(initial, target, current) {
-  weight_loss <- current - initial
-  goal <- inital - target
+  weight_loss <- initial - current
+  goal <- initial - target
+  return((weight_loss / goal) * 100)
   
 }
 
+
+
 plot_progress <- function(log, users) {
   all <- summarize_all(log, users)
-  initials <- map_chr(users, "initial")
-  targets <- map_chr(users, "target")
+  initials <- map_dbl(users, "initial")
+  targets <- map_dbl(users, "target")
   currents <- get_current_weight(log, users)
   
-  weight_loss <- initials - currents
+  progress <- pmap_dbl(.l = list(initials, targets, currents), function(a,b,c) {
+    return(compute_progress(a, b, c))
+    })
   
   
+  p <- progress %>% enframe() %>% select(name, progress = value) %>% 
+    ggplot(aes(x = name, y = progress)) + geom_bar(stat = "identity", position = "dodge") +
+    ylim(c(0,100)) + 
+    theme_bw()
+  return(p)
   
 }
 
@@ -147,7 +157,6 @@ server <- function(input, output) {
 
 
 
-map(users, "initial")
 # Run the application 
 shinyApp(ui = ui, server = server)
 
