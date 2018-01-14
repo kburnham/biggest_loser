@@ -32,7 +32,9 @@ ui <- fluidPage(
          dateInput("date", "Date", value = Sys.Date()),
          numericInput("weight", "Weight", value = NA),
          actionButton("add_weight", "Add Weight"),
-         tableOutput("log")
+         tableOutput("log"),
+         checkboxGroupInput("users_to_show", label = "People to include in plot", choices = names(users), 
+                            selected = names(users))
       ),
       
       # Show a plot of the generated distribution
@@ -48,9 +50,7 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   
-  # log <- eventReactive(input$person, {
-  #   return(load_log(input$person))
-  # })
+  users_r <- reactive({users[names(users) %in% input$users_to_show]})
    
   log <- eventReactive(input$add_weight, {
     if (!is.na(input$weight)) {
@@ -66,11 +66,12 @@ server <- function(input, output) {
    output$log <- renderTable({log() %>% process_log(input$person) %>% 
        filter(date > as.Date("2018-01-08") & source == "scale") %>% 
        mutate(date = format(date, format = "%m-%d")) %>% 
-       select(date, weight, moving_ave = moving_average, daily = daily_weight_loss)})
+       select(date, weight, moving_ave = moving_average, daily = daily_weight_loss) %>% 
+       head(10)})
    
    
-   output$progress <- renderPlot({plot_progress(log(), users)})
-   output$weight_plot <- renderPlot({plot_weights(log(), users)})
+   output$progress <- renderPlot({plot_progress(log(), users_r())})
+   output$weight_plot <- renderPlot({plot_weights(log(), users_r())})
    
   }
 
