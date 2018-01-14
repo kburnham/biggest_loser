@@ -74,7 +74,7 @@ summarize_all <- function(log, users) {
 
 get_current_weight <- function(log, users) {
   all <- summarize_all(log, users)
- current_weights <-  map_dbl("Snowzy", function(x) {
+ current_weights <-  map_dbl(names(users), function(x) {
     all %>% filter(person == x) %>% filter(date == max(date)) %>% 
       pull(moving_average)
   })
@@ -102,10 +102,13 @@ plot_progress <- function(log, users) {
     return(compute_progress(a, b, c))
     })
   
-  
+  breaks = seq(20, 100, 20)
+  labels = paste0(breaks, "%")
   p <- progress %>% enframe() %>% select(name, progress = value) %>% 
-    ggplot(aes(x = name, y = progress)) + geom_bar(stat = "identity", position = "dodge") +
-    ylim(c(0,100)) + 
+    ggplot(aes(x = name, y = progress, fill = name)) + geom_bar(stat = "identity", position = "dodge") +
+    scale_y_continuous(breaks = breaks, labels = labels, limits = c(0,100)) +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
     theme_bw()
   return(p)
   
@@ -123,11 +126,15 @@ ui <- fluidPage(
          selectInput("person", "Person", names(users)),
          dateInput("date", "Date", value = Sys.Date()),
          numericInput("weight", "Weight", value = NA),
-         actionButton("add_weight", "Add Weight")
+         actionButton("add_weight", "Add Weight"),
+         tableOutput("log")
       ),
       
       # Show a plot of the generated distribution
-      mainPanel(dataTableOutput("log"))
+      mainPanel(
+        
+        plotOutput("progress"))
+      
       )
    
 )
@@ -150,9 +157,14 @@ server <- function(input, output) {
   
   
  
-   output$log <- renderDataTable({log() %>% process_log(input$person) %>% 
+   output$log <- renderTable({log() %>% process_log(input$person) %>% 
        filter(date > as.Date("2018-01-08") & source == "scale") %>% 
-       select(date, weight, moving_average, daily_weight_loss, weight_loss_past_7_days)})
+       mutate(date = format(date, format = "%m-%d")) %>% 
+       select(date, weight, moving_ave = moving_average, daily = daily_weight_loss)})
+   
+   
+   output$progress <- renderPlot({plot_progress(log(), users)})
+   
   }
 
 
