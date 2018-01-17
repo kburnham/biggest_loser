@@ -2,22 +2,26 @@
   "BK": {
     "name": ["kevin"],
     "target": [195],
-    "initial": [215.7]
+    "initial": [215.7],
+    "plan": ["lose"]
   },
   "NoushDog": {
     "name": ["anousha"],
     "target": [110],
-    "initial": [116]
+    "initial": [116],
+    "plan": ["lose"]
   },
   "RoryBoo": {
     "name": ["rory"],
     "target": [155],
-    "initial": [167]
+    "initial": [167],
+    "plan": ["lose"]
   },
   "Snowzy": {
     "name": ["Snowden"],
     "target": [142],
-    "initial": [152]
+    "initial": [152],
+    "plan": ["lose"]
   },
   "ZarZar": {
     "name": ["Zarrin"],
@@ -27,6 +31,8 @@
   "BZ": {
     "name": ["brad"],
     "target": [185],
-    "initial": [195]
+    "initial": [195],
+    "plan": ["lose"]
+
   }
 }
