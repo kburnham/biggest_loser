@@ -24,7 +24,9 @@ add_to_log <- function(person, date, weight) {
 process_log <- function(log, who, days_to_average = 7) {
   ## add to front of log so that rollmean and roll sum will always work
   
-  log <- log %>% filter(person == who)
+  # if there are multiple entries for a given date, we ignore the more recent one (since entries appear in the order they were entered)
+  log <- log %>% filter(person == who) %>% filter(!duplicated(date))
+  
   
   append <- data.frame(person = who, date = seq(min(log$date) - days(8), min(log$date) - days(1),
                                                 by = "days"),
