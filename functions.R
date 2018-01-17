@@ -81,19 +81,23 @@ plot_progress <- function(log, users) {
   initials <- map_dbl(users, "initial")
   targets <- map_dbl(users, "target")
   currents <- get_current_weight(log, users)
+  pounds_lost <- (initials - currents) %>% round(2)
   
   progress <- pmap_dbl(.l = list(initials, targets, currents), function(a,b,c) {
     return(compute_progress(a, b, c))
   })
   
+  progress <- progress %>% enframe() %>% mutate(pounds_lost = pounds_lost)
+  
   breaks = seq(20, 100, 20)
   labels = paste0(breaks, "%")
-  p <- progress %>% enframe() %>% select(name, progress = value) %>% 
+  p <- progress %>% select(name, progress = value, pounds_lost) %>% 
     ggplot(aes(x = name, y = progress, fill = name)) + geom_bar(stat = "identity", position = "dodge") +
     scale_y_continuous(breaks = breaks, labels = labels, limits = c(0,100)) +
+    geom_text(aes(x = name, y = progress, label = pounds_lost), size = 3, vjust = 0) + 
     theme_bw() +
     theme(axis.text.x = element_text(angle = 90, hjust = 1))
-  theme_bw()
+  
   return(p)
   
 }
@@ -111,3 +115,5 @@ plot_weights <- function(log, users) {
   
   
 }
+
+
