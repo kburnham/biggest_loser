@@ -35,7 +35,7 @@ process_log <- function(log, who, days_to_average = 7) {
   
   log %>% 
     mutate(source = "scale") %>% 
-    right_join(data.frame(date = seq(from = min(log$date), to = max(log$date), "days"))) %>% 
+    right_join(data.frame(date = seq(from = min(log$date), to = max(log$date), "days")), by = "date") %>% 
     arrange(desc(date)) %>% 
     mutate(source = ifelse(is.na(source), "fill", "scale"),
            person = who,
