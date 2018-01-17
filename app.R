@@ -15,7 +15,7 @@ library(jsonlite)
 
 
 end_date = "04/30/2018"
-users <- fromJSON("users.json")
+users <- jsonlite::fromJSON("users.json")
 
 source("functions.R")
 

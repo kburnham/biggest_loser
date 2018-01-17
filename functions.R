@@ -13,8 +13,10 @@ load_log <- function(user = NA) {
 add_to_log <- function(person, date, weight) {
   input <- data.frame(person = person, date = as.Date(date), weight = weight)
   log <- load_log()
-  log <- rbind(log, input)
-  write_csv(log, "log.csv")
+  log2 <- rbind(log, input)
+  dups <- duplicated(log2)
+  if (tail(dups, 1)) write_csv(log, "log.csv") else write_csv(log2, "log.csv")
+  
 }
 
 
