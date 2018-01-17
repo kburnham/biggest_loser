@@ -65,7 +65,7 @@ server <- function(input, output) {
  
    output$log <- renderTable({log() %>% process_log(input$person) %>% 
        filter(date > as.Date("2018-01-08") & source == "scale") %>% 
-       mutate(date = format(date, format = "%m-%d")) %>% 
+       mutate(date = format(date, format = "%d")) %>% 
        select(date, weight, moving_ave = moving_average, daily = daily_weight_loss) %>% 
        head(10)})
    

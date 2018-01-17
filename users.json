@@ -23,5 +23,10 @@
     "name": ["Zarrin"],
     "target": [140],
     "initial": [149]
+  },
+  "BZ": {
+    "name": ["brad"],
+    "target": [185],
+    "initial": [195]
   }
 }
