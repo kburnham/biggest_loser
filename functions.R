@@ -93,7 +93,8 @@ plot_progress <- function(log, users) {
   labels = paste0(breaks, "%")
   p <- progress %>% select(name, progress = value, pounds_lost) %>% 
     ggplot(aes(x = name, y = progress, fill = name)) + geom_bar(stat = "identity", position = "dodge") +
-    scale_y_continuous(breaks = breaks, labels = labels, limits = c(0,100)) +
+    scale_y_continuous(breaks = breaks, labels = labels, limits = c(-5,100)) +
+    geom_hline(yintercept = 0, color = "black") +
     geom_text(aes(x = name, y = progress, label = pounds_lost), size = 3, vjust = 0) + 
     theme_bw() +
     theme(axis.text.x = element_text(angle = 90, hjust = 1))
