@@ -26,7 +26,8 @@
   "ZarZar": {
     "name": ["Zarrin"],
     "target": [140],
-    "initial": [149]
+    "initial": [149],
+    "plan": ["lose"]
   },
   "BZ": {
     "name": ["brad"],
