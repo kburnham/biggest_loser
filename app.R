@@ -23,6 +23,7 @@ ui <- fluidPage(
          dateInput("date", "Date", value = Sys.Date()),
          numericInput("weight", "Weight", value = NA),
          actionButton("add_weight", "Add Weight"),
+         tableOutput("summary"),
          tableOutput("log"),
          checkboxGroupInput("users_to_show", label = "People to include in plot", choices = names(users), 
                             selected = names(users))
@@ -53,15 +54,23 @@ server <- function(input, output) {
     }}, ignoreNULL = FALSE)
   
   
+  
+  
+  
+  
  
    output$log <- renderTable({log() %>% process_log(input$person) %>% 
        filter(date > as.Date("2018-01-08") & source == "scale") %>% 
        mutate(date = format(date, format = "%d")) %>% 
-       select(date, weight, moving_ave = moving_average, daily = daily_weight_loss) %>% 
-       head(10)})
+       select(date, scale = weight, moving_ave = moving_average, daily = daily_weight_loss) %>% 
+       head(14)})
+   
+   output$summary <- renderTable({log() %>% user_summary(users_r()) %>% 
+       select(user, Initial = initials, Current = currents, Target = targets, SoFar = pounds_lost) %>% 
+       filter(user == input$person)})
    
    
-   output$progress <- renderPlot({plot_progress(log(), users_r())})
+   output$progress <- renderPlot({user_summary(log(), users_r()) %>% plot_progress()})
    output$weight_plot <- renderPlot({plot_weights(log(), users_r())})
    
   }
