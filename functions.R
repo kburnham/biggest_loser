@@ -101,7 +101,7 @@ plot_weights <- function(log, users) {
   all <- summarize_all(log, users)
   all %>% ggplot(aes(x = date, y = moving_average, color = person)) + 
     geom_line() +
-    coord_cartesian(xlim = c(as.Date("2018-01-09"), as.Date("2018-05-01")),
+    coord_cartesian(xlim = c(as.Date("2018-04-01"), as.Date("2018-05-01")),
                     ylim = c(100, max(all$weight))) +
     theme_bw()
   

@@ -5,7 +5,7 @@ library(zoo)
 library(jsonlite)
 
 
-end_date = "04/30/2018"
+end_date = "06/30/2018"
 users <- jsonlite::fromJSON("users.json")
 
 source("functions.R")
