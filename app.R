@@ -21,7 +21,7 @@ ui <- fluidPage(
       sidebarPanel(
          selectInput("person", "Person", names(users)),
          dateInput("date", "Date", value = Sys.Date()),
-         numericInput("weight", "Weight", value = NA),
+         numericInput("weight", "Weight", value = 0),
          actionButton("add_weight", "Add Weight"),
          tableOutput("summary"),
          tableOutput("log"),
@@ -63,6 +63,7 @@ server <- function(input, output) {
        filter(date > as.Date("2018-01-08") & source == "scale") %>% 
        mutate(date = format(date, format = "%d")) %>% 
        select(date, scale = weight, moving_ave = moving_average, daily = daily_weight_loss) %>% 
+       filter(!is.na(daily) & !is.na(scale) & !is.na(moving_ave)) %>% 
        head(14)})
    
    output$summary <- renderTable({log() %>% user_summary(users_r()) %>% 

@@ -33,7 +33,7 @@ process_log <- function(log, who, days_to_average = 7) {
                        weight = log$weight[log$date == min(log$date)])
   log <- rbind(append, log)
   
-  log %>% 
+  plog <- log %>% 
     mutate(source = "scale") %>% 
     right_join(data.frame(date = seq(from = min(log$date), to = max(log$date), "days")), by = "date") %>% 
     arrange(desc(date)) %>% 
